@@ -8,12 +8,16 @@ const colors = require("colors");
 const connectionDB = require("./config/mongoDB");
 const multer = require("multer");
 const path = require("path");
-const {MulterError}=require("multer");
+const {MulterError} = require("multer");
 
 // Storage
 const storage = multer.diskStorage({
       destination : (req, file, cb) => {
-            cb(null, "./media/users")
+            if(file.fieldname == "upload_cv"){
+                  cb(null, "./media/cv_files")
+            }else{
+                  cb(null, "./media/users")
+            }
       },
       filename : (req, file, cb) => {
             let extName = path.extname(file.originalname);
@@ -26,10 +30,19 @@ const upload = multer({
       storage : storage,
       fileFilter : (req, file, cb) => {
             
-            if(file.mimetype == "iamge/jpg" || file.mimetype == "image/png" || file.mimetype == "image/svg" || file.mimetype == "image/jpeg"){
+            if(file.fieldname == "upload_image"){
+                  if(file.mimetype == "iamge/jpg" || file.mimetype == "image/png" || file.mimetype == "image/svg" || file.mimetype == "image/jpeg"){
                   cb(null, true)
             }else{
                   cb(new Error("Invalid files formate !"))
+            }
+            }
+            else if(file.fieldname == "upload_cv"){
+                  if(file.mimetype == "application/pdf"){
+                        cb(null, true)
+                  }else{
+                        cb(new Error("Only pdf file is acceptable !"))
+                  }
             }
       }
 })
@@ -41,7 +54,19 @@ connectionDB()
 apps.use(json())
 apps.use(urlencoded({extended : false}))
 
-apps.post("/upload",upload.array("upload_image") , (req, res) => {
+// Multiple fields upload objects
+const cpupload = upload.fields([
+      {
+            name : "upload_image",
+            maxCount : ''
+      },
+      {
+            name : "upload_cv",
+            maxCount : 1
+      }
+])
+
+apps.post("/upload",cpupload , (req, res) => {
       res.send("Uploaded");
 })
 
@@ -49,7 +74,7 @@ apps.post("/upload",upload.array("upload_image") , (req, res) => {
 apps.use((err,req, res, next) => {
       if(err){
             if(err instanceof MulterError){
-                  res.status(500).send("there was an uploaded error !")
+                  res.status(500).send("There was an uploaded error !")
             }else{
                   res.status(500).send(err.message)
             }
