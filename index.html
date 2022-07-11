@@ -30,6 +30,7 @@
                                     </label>
                                     <input type="file" class="d-none form-control" name="upload_cv" id="upload_cv" placeholder="" aria-describedby="fileHelpId">
                               </div>
+                              <h2 class="border" id="cv_preview"></h2>
                                <input  class=" mt-3 btn btn-primary btn-lg" type="submit" value="Upload">
                         </form>
                   </div>
@@ -44,31 +45,57 @@
        * Photo uploaded scripting
       */
             const upload_image = document.getElementById("upload_image");
+            const upload_cv = document.getElementById("upload_cv");
             const image_preview = document.getElementById("image_preview");
+            const prev_img = document.getElementsByClassName("prev_img");
+            const cv_preview = document.getElementById("cv_preview");
+            
+
+            // Upload images scripting
             upload_image.onchange = (e) => {
-                  const images = e.target.files;
+                  images = e.target.files;
+                  images_arry = Array.from(e.target.files);
+
+                  
                  let prev = "";
+
                  for (const image of images) {
-                   let image_url = URL.createObjectURL(image);
-                        prev += `<img class="close" style="width : 200px;height : 200px; object-Fit : cover;cursor: pointer !important;margin : 5px;" src="${image_url}"/>`
-
-
-                      /*
-                        const {type} = image;
+                       const {type} = image;
                        if(type == "image/jpeg" || type == "image/jpg" || type == "image/png" 
                        || type == "image/svg" || type == "image/gif" ){
                         let image_url = URL.createObjectURL(image);
-                        prev += `<img class="close" style="width : 200px;height : 200px; object-Fit : cover;cursor: pointer !important;margin : 5px;" src="${image_url}"/>`
+                        prev += `<img class="prev_img close" style="width : 200px;height : 200px; object-Fit : cover;cursor: pointer !important;margin : 5px;" src="${image_url}"/>`
+                              
 
                        }else{
                         alert("Unsuported format !")
-                       }*/
+                       }
+                  }
+                  image_preview.innerHTML = prev;
 
-                       
-                 }
-                 image_preview.innerHTML = prev;
-                 
+                  
+                  //Remove wrong selected images
+                   images_arry.forEach((element, index) => {
+                        prev_img[index].addEventListener('click' , () => {
+                              prev_img[index].remove()
+                              images_arry.splice(index, 1)
+                        })                    
+                  });
+                  
             }
+            
+             
+
+            
+
+            
+            //Upload cv/pdf files scripting
+            upload_cv.onchange = (e) => {
+                  const cv = e.target.files[0];
+                  console.log(cv.name);
+                  cv_preview.innerHTML = ` <p class="small"> You selected <p/> ${cv.name}`;
+            }
+            
       </script>
 </body>
 </html>
